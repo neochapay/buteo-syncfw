@@ -258,7 +258,9 @@ private:
     QString iRemoteId;
     StorageBooker *iStorageBooker;
     QMap<QString, bool> iStorageMap;
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     NetworkManager *iNetworkManager;
+#endif
 
 #ifdef SYNCFW_UNIT_TESTS
     friend class SyncSessionTest;

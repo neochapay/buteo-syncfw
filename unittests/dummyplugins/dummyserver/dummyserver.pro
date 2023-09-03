@@ -9,6 +9,7 @@ INCLUDEPATH += . \
 
 CONFIG += plugin
 QT -= gui
+QT += network
 
 #input
 HEADERS += DummyServer.h

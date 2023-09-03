@@ -19,13 +19,13 @@ INCLUDEPATH += . \
 PRE_TARGETDEPS += libmsyncd.a
 
 
-PKGCONFIG += dbus-1 libsignon-qt5 accounts-qt5
-LIBS += -lbuteosyncfw5
-packagesExist(qt5-boostable) {
+PKGCONFIG += dbus-1 libsignon-qt$${QT_MAJOR_VERSION} accounts-qt$${QT_MAJOR_VERSION}
+LIBS += -lbuteosyncfw$${QT_MAJOR_VERSION}
+packagesExist(qt$${QT_MAJOR_VERSION}-boostable) {
     DEFINES += HAS_BOOSTER
-    PKGCONFIG += qt5-boostable
+    PKGCONFIG += qt$${QT_MAJOR_VERSION}-boostable
 } else {
-    warning("qt5-boostable not available; startup times will be slower")
+    warning("qt$${QT_MAJOR_VERSION}-boostable not available; startup times will be slower")
 }
 
 QMAKE_LIBDIR_QT += ../libsyncprofile/

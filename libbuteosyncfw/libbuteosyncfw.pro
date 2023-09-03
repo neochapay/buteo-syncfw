@@ -1,5 +1,5 @@
 TEMPLATE = lib
-TARGET = buteosyncfw5
+TARGET = buteosyncfw$${QT_MAJOR_VERSION}
 DEPENDPATH += . clientfw  common  pluginmgr  profile
 INCLUDEPATH += . clientfw  common  pluginmgr  profile
 
@@ -16,14 +16,13 @@ CONFIG += dll \
 
 #DEFINES += BUTEO_ENABLE_DEBUG
 
-DEFINES += DEFAULT_PLUGIN_PATH=\"\\\"$$[QT_INSTALL_LIBS]/buteo-plugins-qt5\\\"\"
+DEFINES += DEFAULT_PLUGIN_PATH=\"\\\"$$[QT_INSTALL_LIBS]/buteo-plugins-qt$${QT_MAJOR_VERSION}\\\"\"
 
 # Input
 HEADERS += common/Logger.h \
            common/LogMacros.h \
            common/SyncCommonDefs.h \
            common/TransportTracker.h \
-           common/NetworkManager.h \
            clientfw/SyncClientInterface.h \
            clientfw/SyncClientInterfacePrivate.h \
            clientfw/SyncDaemonProxy.h \
@@ -57,8 +56,7 @@ HEADERS += common/Logger.h \
            pluginmgr/OOPServerPlugin.h \
            pluginmgr/ButeoPluginIface.h
 SOURCES += common/Logger.cpp \
-           common/TransportTracker.cpp \
-           common/NetworkManager.cpp \
+           common/TransportTracker.cpp \           
            clientfw/SyncClientInterface.cpp \
            clientfw/SyncClientInterfacePrivate.cpp \
            clientfw/SyncDaemonProxy.cpp \
@@ -85,6 +83,8 @@ SOURCES += common/Logger.cpp \
            pluginmgr/OOPServerPlugin.cpp \
            pluginmgr/ButeoPluginIface.cpp
 
+equals(QT_MAJOR_VERSION, 5): SOURCES += common/NetworkManager.cpp
+
 usb-moded {
   message("Building with usb-moded")
   DEFINES += __USBMODED__
@@ -105,13 +105,12 @@ QMAKE_CLEAN += lib$${TARGET}.prl pkgconfig/*
 
 # install
 target.path = $$[QT_INSTALL_LIBS]
-headers.path = /usr/include/buteosyncfw5/
+headers.path = /usr/include/buteosyncfw$${QT_MAJOR_VERSION}/
 
 headers.files = common/Logger.h \
            common/LogMacros.h \
            common/SyncCommonDefs.h \
            common/TransportTracker.h \
-           common/NetworkManager.h \
            clientfw/SyncClientInterface.h \
            clientfw/SyncClientInterfacePrivate.h \
            clientfw/SyncDaemonProxy.h \
@@ -142,6 +141,8 @@ headers.files = common/Logger.h \
            profile/SyncSchedule.h \
            profile/SyncSchedule_p.h \
            profile/TargetResults.h
+
+equals(QT_MAJOR_VERSION, 5): headers.files += common/NetworkManager.h
 
 INSTALLS += target headers
 

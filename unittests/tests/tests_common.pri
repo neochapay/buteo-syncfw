@@ -22,8 +22,8 @@ LIBS += -lgcov
 
 LIBS += -L$${OUT_PWD}/$${tests_subdir_r}/../../libbuteosyncfw
 
-PKGCONFIG += libsignon-qt5 accounts-qt5
-LIBS += -lbuteosyncfw5
+PKGCONFIG += libsignon-qt$${QT_MAJOR_VERSION} accounts-qt$${QT_MAJOR_VERSION}
+LIBS += -lbuteosyncfw$${QT_MAJOR_VERSION}
 
 # This is needed to avoid adding the /usr/lib link directory before the
 # newer version in the present directories

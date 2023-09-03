@@ -42,6 +42,12 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
 #include <QtDBus/QtDBus>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#define VFV QVariant::fromValue
+#else
+#define VFV qVariantFromValue
+#endif
+
 
 /*! \brief Proxy class for interface com.meego.msyncd
  */
@@ -68,7 +74,7 @@ public Q_SLOTS: // METHODS
     inline Q_NOREPLY void abortSync(const QString &aProfileId)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileId);
+        argumentList << VFV(aProfileId);
         callWithArgumentList(QDBus::NoBlock, QLatin1String("abortSync"), argumentList);
     }
 
@@ -76,7 +82,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<bool> addProfile(const QString &aProfileAsXml)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileAsXml);
+        argumentList << VFV(aProfileAsXml);
         return asyncCallWithArgumentList(QLatin1String("addProfile"), argumentList);
     }
 
@@ -98,7 +104,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<QString> getLastSyncResult(const QString &aProfileId)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileId);
+        argumentList << VFV(aProfileId);
         return asyncCallWithArgumentList(QLatin1String("getLastSyncResult"), argumentList);
     }
 
@@ -106,7 +112,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<bool> isLastSyncScheduled(const QString &aProfileId)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileId);
+        argumentList << VFV(aProfileId);
         return asyncCallWithArgumentList(QLatin1String("isLastSyncScheduled"), argumentList);
     }
 
@@ -114,7 +120,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<int> lastSyncMajorCode(const QString &aProfileId)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileId);
+        argumentList << VFV(aProfileId);
         return asyncCallWithArgumentList(QLatin1String("lastSyncMajorCode"), argumentList);
     }
 
@@ -122,14 +128,14 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<int> lastSyncMinorCode(const QString &aProfileId)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileId);
+        argumentList << VFV(aProfileId);
         return asyncCallWithArgumentList(QLatin1String("lastSyncMinorCode"), argumentList);
     }
     //! \see SyncDBusInterface::lastSyncTime()
     inline QDBusPendingReply<QString> lastSyncTime(const QString &aProfileId)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileId);
+        argumentList << VFV(aProfileId);
         return asyncCallWithArgumentList(QLatin1String("lastSyncTime"), argumentList);
     }
 
@@ -137,7 +143,7 @@ public Q_SLOTS: // METHODS
     inline Q_NOREPLY void releaseStorages(const QStringList &aStorageNames)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aStorageNames);
+        argumentList << VFV(aStorageNames);
         callWithArgumentList(QDBus::NoBlock, QLatin1String("releaseStorages"), argumentList);
     }
 
@@ -145,7 +151,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<bool> removeProfile(const QString &aProfileId)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileId);
+        argumentList << VFV(aProfileId);
         return asyncCallWithArgumentList(QLatin1String("removeProfile"), argumentList);
     }
 
@@ -153,7 +159,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<bool> requestStorages(const QStringList &aStorageNames)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aStorageNames);
+        argumentList << VFV(aStorageNames);
         return asyncCallWithArgumentList(QLatin1String("requestStorages"), argumentList);
     }
 
@@ -168,7 +174,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<bool> saveSyncResults(const QString &aProfileId, const QString &aSyncResults)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileId) << qVariantFromValue(aSyncResults);
+        argumentList << VFV(aProfileId) << VFV(aSyncResults);
         return asyncCallWithArgumentList(QLatin1String("saveSyncResults"), argumentList);
     }
 
@@ -176,7 +182,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<bool> setSyncSchedule(const QString &aProfileId, const QString &aScheduleAsXml)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileId) << qVariantFromValue(aScheduleAsXml);
+        argumentList << VFV(aProfileId) << VFV(aScheduleAsXml);
         return asyncCallWithArgumentList(QLatin1String("setSyncSchedule"), argumentList);
     }
 
@@ -184,7 +190,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<bool> startSync(const QString &aProfileId)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileId);
+        argumentList << VFV(aProfileId);
         return asyncCallWithArgumentList(QLatin1String("startSync"), argumentList);
     }
 
@@ -192,7 +198,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<QString> syncProfile(const QString &aProfileId)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileId);
+        argumentList << VFV(aProfileId);
         return callWithArgumentList(QDBus::Block, QLatin1String("syncProfile"), argumentList);
     }
 
@@ -200,7 +206,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<QStringList> syncProfilesByKey(const QString &aKey, const QString &aValue)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aKey) << qVariantFromValue(aValue);
+        argumentList << VFV(aKey) << VFV(aValue);
         return asyncCallWithArgumentList(QLatin1String("syncProfilesByKey"), argumentList);
     }
 
@@ -208,7 +214,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<QStringList> syncProfilesByType(const QString &aType)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aType);
+        argumentList << VFV(aType);
         return asyncCallWithArgumentList(QLatin1String("syncProfilesByType"), argumentList);
     }
 
@@ -216,7 +222,7 @@ public Q_SLOTS: // METHODS
     inline QDBusPendingReply<bool> updateProfile(const QString &aProfileAsXml)
     {
         QList<QVariant> argumentList;
-        argumentList << qVariantFromValue(aProfileAsXml);
+        argumentList << VFV(aProfileAsXml);
         return asyncCallWithArgumentList(QLatin1String("updateProfile"), argumentList);
     }
 

@@ -1,7 +1,7 @@
 TEMPLATE = app
 TARGET = buteo-oopp-runner
 
-QT += dbus
+QT += dbus network
 QT -= gui
 
 INCLUDEPATH += $$PWD \
@@ -10,7 +10,7 @@ INCLUDEPATH += $$PWD \
     ../libbuteosyncfw/common \
     ../libbuteosyncfw/profile
 
-LIBS += -lbuteosyncfw5
+LIBS += -lbuteosyncfw$${QT_MAJOR_VERSION}
 LIBS += -L../libbuteosyncfw
 
 HEADERS += ButeoPluginIfaceAdaptor.h \

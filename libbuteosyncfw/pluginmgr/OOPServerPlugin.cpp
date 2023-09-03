@@ -22,7 +22,11 @@
 #include "OOPServerPlugin.h"
 #include "LogMacros.h"
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QRegularExpression>
+#else
 #include <QRegExp>
+#endif
 
 using namespace Buteo;
 
@@ -37,7 +41,11 @@ OOPServerPlugin::OOPServerPlugin(const QString &aPluginName,
     // randomly-generated profile names cannot be registered
     // as dbus service paths due to being purely numeric.
     QString profileName = aProfile.name();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    int numericIdx = profileName.indexOf(QRegularExpression("[0123456789]"));
+#else
     int numericIdx = profileName.indexOf(QRegExp("[0123456789]"));
+#endif
     QString servicePath = numericIdx == 0
                           ? QString(QLatin1String("%1%2%3"))
                           .arg(DBUS_SERVICE_NAME_PREFIX)

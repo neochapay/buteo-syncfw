@@ -561,7 +561,8 @@ bool SyncSchedule::isSyncScheduled(const QDateTime &aActualDateTime, const QDate
 
 SyncSchedule::Days SyncSchedulePrivate::parseDays(const QString &aDays) const
 {
-    SyncSchedule::Days days = 0;
+    SyncSchedule::Days days = (SyncSchedule::Days)0;
+
     const SyncSchedule::Day fromStrDays[] =
         {SyncSchedule::Monday, SyncSchedule::Tuesday,
          SyncSchedule::Wednesday, SyncSchedule::Thursday,
@@ -569,7 +570,11 @@ SyncSchedule::Days SyncSchedulePrivate::parseDays(const QString &aDays) const
          SyncSchedule::Sunday};
     if (!aDays.isNull()) {
         QStringList dayList = aDays.split(DAY_SEPARATOR,
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                                          Qt::SkipEmptyParts);
+#else
                                           QString::SkipEmptyParts);
+#endif
         foreach (QString dayStr, dayList) {
             bool ok;
             int dayNum = dayStr.toInt(&ok);
