@@ -21,12 +21,17 @@
  * 02110-1301 USA
  *
  */
-
 #include "TransportTracker.h"
 #if __USBMODED__
 #include "USBModedProxy.h"
 #endif
+#include <QtCore>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include "NetworkManager.h"
+#else
+#include <QNetworkInformation>
+#endif
+
 #include "LogMacros.h"
 #include <QMutexLocker>
 #include <QDBusConnection>
@@ -102,7 +107,7 @@ TransportTracker::TransportTracker(QObject *aParent) :
         qCWarning(lcButeoCore) << "The BT adapter is powered off or missing";
     }
 #endif
-
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     // Internet
     // @todo: enable when internet state is reported correctly.
     iInternet = new NetworkManager(this);
@@ -111,6 +116,10 @@ TransportTracker::TransportTracker(QObject *aParent) :
     connect(iInternet,
             SIGNAL(statusChanged(bool, Sync::InternetConnectionType)),
             SLOT(onInternetStateChanged(bool, Sync::InternetConnectionType)) /*, Qt::QueuedConnection*/);
+#else
+    QNetworkInformation* iInternet = QNetworkInformation::instance();
+    connect(iInternet, &QNetworkInformation::transportMediumChanged, this, &TransportTracker::onInternetStateChanged);
+#endif
 }
 
 TransportTracker::~TransportTracker()
@@ -132,7 +141,13 @@ void TransportTracker::onUsbStateChanged(bool aConnected)
     FUNCTION_CALL_TRACE(lcButeoTrace);
 
     qCDebug(lcButeoCore) << "USB state changed:" << aConnected;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    m_connected = aConnected;
+    m_aType = QNetworkInformation::TransportMedium::Ethernet;
+    updateState();
+#else
     updateState(Sync::CONNECTIVITY_USB, aConnected);
+#endif
 }
 
 #ifdef HAVE_BLUEZ_5
@@ -220,7 +235,37 @@ void TransportTracker::onBtInterfacesRemoved(const QDBusObjectPath &path, const 
     }
 }
 #endif
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void TransportTracker::onReachabilityChanged(QNetworkInformation::Reachability newReachability)
+{
+    FUNCTION_CALL_TRACE(lcButeoTrace);
 
+    bool connected;
+    if(newReachability == QNetworkInformation::Reachability::Online) {
+        connected = true;
+    } else {
+        connected = false;
+    }
+    if(connected != m_connected) {
+        m_connected = connected;
+        updateState();
+    }
+}
+
+void TransportTracker::onInternetStateChanged(QNetworkInformation::TransportMedium aType) {
+    FUNCTION_CALL_TRACE(lcButeoTrace);
+
+    if(aType != m_aType) {
+        m_aType = aType;
+        updateState();
+    }
+}
+
+void TransportTracker::updateState() {
+    emit connectivityStateChanged(m_aType, m_connected);
+}
+
+#else
 void TransportTracker::onInternetStateChanged(bool aConnected, Sync::InternetConnectionType aType)
 {
     FUNCTION_CALL_TRACE(lcButeoTrace);
@@ -247,7 +292,7 @@ void TransportTracker::updateState(Sync::ConnectivityType aType, bool aState)
         }
     }
 }
-
+#endif
 #ifdef HAVE_BLUEZ_5
 bool TransportTracker::btConnectivityStatus()
 {

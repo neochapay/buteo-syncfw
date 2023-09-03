@@ -324,26 +324,56 @@ void SyncProfile::setSyncSchedule(const SyncSchedule &aSchedule)
 {
     d_ptr->iSchedule = aSchedule;
 }
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+QList<QNetworkInformation::TransportMedium> SyncProfile::internetConnectionTypes() const
+#else
 QList<Sync::InternetConnectionType> SyncProfile::internetConnectionTypes() const
+#endif
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QSet<QNetworkInformation::TransportMedium> types;
+#else
     QSet<Sync::InternetConnectionType> types;
+#endif
     const QStringList typeStrings = key(KEY_INTERNET_CONNECTION_TYPES).split(',');
     foreach (QString typeString, typeStrings) {
         bool ok = false;
         int typeInt = typeString.toInt(&ok);
-        if (!ok || typeInt < Sync::INTERNET_CONNECTION_UNKNOWN || typeInt > Sync::INTERNET_CONNECTION_LTE) {
+        if (!ok
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            || typeInt < (int)QNetworkInformation::TransportMedium::Unknown
+            || typeInt > (int)QNetworkInformation::TransportMedium::Bluetooth
+#else
+            || typeInt < Sync::INTERNET_CONNECTION_UNKNOWN
+            || typeInt > Sync::INTERNET_CONNECTION_LTE
+#endif
+        ) {
             continue;
         }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        types.insert(QNetworkInformation::TransportMedium(typeInt));
+#else
         types.insert(Sync::InternetConnectionType(typeInt));
+#endif
     }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    return types.values();
+#else
     return types.toList();
+#endif
 }
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void SyncProfile::setInternetConnectionTypes(const QList<QNetworkInformation::TransportMedium> &aTypes)
+#else
 void SyncProfile::setInternetConnectionTypes(const QList<Sync::InternetConnectionType> &aTypes)
+#endif
 {
     QStringList typeStrings;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    foreach (QNetworkInformation::TransportMedium type, aTypes) {
+#else
     foreach (Sync::InternetConnectionType type, aTypes) {
+#endif
         typeStrings.append(QString::number(int(type)));
     }
     setKey(KEY_INTERNET_CONNECTION_TYPES, typeStrings.join(','));

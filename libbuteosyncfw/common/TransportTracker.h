@@ -31,7 +31,9 @@
 #include <QMutex>
 #include <QDBusVariant>
 #include <QDBusConnection>
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QNetworkInformation>
+#endif
 #ifdef HAVE_BLUEZ_5
 #include <BtCommon.h>
 #endif
@@ -75,15 +77,21 @@ signals:
      * @param aType Connectivity type whose state has changed
      * @param aState New state. True if available, false if not.
      */
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void connectivityStateChanged(QNetworkInformation::TransportMedium aType, bool aState);
+#else
     void connectivityStateChanged(Sync::ConnectivityType aType, bool aState);
-
+#endif
     /*! \brief Signal emitted when a n/w state changes
      *
      * @param aState New state. True if available, false if not.
      * @param aType Connection type. The type of connetcion with the Internet.
      */
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void networkStateChanged(bool aConnected, QNetworkInformation::TransportMedium aType);
+#else
     void networkStateChanged(bool aState, Sync::InternetConnectionType aType);
-
+#endif
     /*! \brief Signal emitted when a network session is successfully opened
      */
     void sessionConnected();
@@ -100,16 +108,24 @@ private slots:
     void onBtInterfacesAdded(const QDBusObjectPath &path, const InterfacesMap &interfaces);
     void onBtInterfacesRemoved(const QDBusObjectPath &path, const QStringList &interfaces);
 #endif
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void onReachabilityChanged(QNetworkInformation::Reachability newReachability);
+    void onInternetStateChanged(QNetworkInformation::TransportMedium aType);
+#else
     void onInternetStateChanged(bool aConnected, Sync::InternetConnectionType aType);
-
+#endif
 private:
 
     QMap<Sync::ConnectivityType, bool> iTransportStates;
 
     USBModedProxy *iUSBProxy;
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QNetworkInformation *iInternet;
+    bool m_connected;
+    QNetworkInformation::TransportMedium m_aType;
+#else
     NetworkManager *iInternet;
+#endif
     QDBusConnection iSystemBus;
     QString iDefaultBtAdapter;
 
@@ -120,8 +136,11 @@ private:
      * @param aType Connectivity type
      * @param aState Connectivity State
      */
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void updateState();
+#else
     void updateState(Sync::ConnectivityType aType, bool aState);
-
+#endif
 #ifdef SYNCFW_UNIT_TESTS
     friend class TransportTrackerTest;
     friend class SynchronizerTest;

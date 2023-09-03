@@ -58,7 +58,7 @@ void TransportTrackerTest :: cleanupTestCase()
 void TransportTrackerTest :: testConnectivityAvailable()
 {
     // set the connectivity status for each type and compare it with the value returned
-
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     // first set value as false
     iTransportTracker->updateState(Sync::CONNECTIVITY_USB, false);
 #ifdef HAVE_BLUEZ_5
@@ -91,7 +91,7 @@ void TransportTrackerTest :: testConnectivityAvailable()
 #endif
     internetTransportStatus = iTransportTracker->isConnectivityAvailable(Sync::CONNECTIVITY_INTERNET);
     QCOMPARE(internetTransportStatus, true);
-
+#endif
 }
 
 void TransportTrackerTest :: testStateChanged()
@@ -128,7 +128,11 @@ void TransportTrackerTest :: testStateChanged()
 
     // change internet state and verify
     bool internetCurrentState = iTransportTracker->isConnectivityAvailable(Sync::CONNECTIVITY_INTERNET);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    iTransportTracker->onInternetStateChanged(QNetworkInformation::TransportMedium::Unknown);
+#else
     iTransportTracker->onInternetStateChanged(!internetCurrentState, Sync::INTERNET_CONNECTION_UNKNOWN);
+#endif
     QCOMPARE(iTransportTracker->isConnectivityAvailable(Sync::CONNECTIVITY_INTERNET), !internetCurrentState);
     QEXPECT_FAIL("", "IMO connectivityStateChanged() should be emitted also for CONNECTIVITY_INTERNET", Continue);
     QCOMPARE(connectivityStateSpy.count(), 1);

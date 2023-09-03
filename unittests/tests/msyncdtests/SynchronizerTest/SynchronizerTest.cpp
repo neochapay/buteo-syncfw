@@ -161,8 +161,9 @@ void SynchronizerTest::testSync()
     QCOMPARE(iSync->iServerActivator->enabledServers().isEmpty(), true);
 
     QVERIFY(iSync->iTransportTracker != 0);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     iSync->iTransportTracker->updateState(Sync::CONNECTIVITY_USB, true);
-
+#endif
     //test startServers()
     QVERIFY(iSync->iServerActivator != 0);
     QCOMPARE(iSync->iServerActivator->enabledServers().isEmpty(), false);

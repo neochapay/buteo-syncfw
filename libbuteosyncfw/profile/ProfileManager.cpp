@@ -1006,7 +1006,11 @@ bool ProfileManagerPrivate::parseFile(const QString &aPath, QDomDocument &aDoc)
         QFile file(aPath);
 
         if (file.open(QIODevice::ReadOnly)) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            parsingOk = aDoc.setContent(&file).errorMessage.isEmpty();
+#else
             parsingOk = aDoc.setContent(&file);
+#endif
             file.close();
 
             if (!parsingOk) {

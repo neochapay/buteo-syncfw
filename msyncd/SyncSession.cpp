@@ -25,7 +25,9 @@
 #include "PluginRunner.h"
 #include "StorageBooker.h"
 #include "SyncProfile.h"
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include "NetworkManager.h"
+#endif
 #include "LogMacros.h"
 
 using namespace Buteo;
@@ -43,7 +45,9 @@ SyncSession::SyncSession(SyncProfile *aProfile, QObject *aParent)
     , iFinished(false)
     , iCreateProfile(false)
     , iStorageBooker(0)
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     , iNetworkManager(0)
+#endif
 {
     FUNCTION_CALL_TRACE(lcButeoTrace);
 }
@@ -57,7 +61,8 @@ SyncSession::~SyncSession()
         iPluginRunner = 0;
         delete runner;
     }
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#else
     if (iNetworkManager) {
         // Disconnect all slots connected to the network manager
         disconnect(iNetworkManager, SIGNAL(connectionSuccess()),
@@ -66,7 +71,7 @@ SyncSession::~SyncSession()
                    this, SLOT(onNetworkSessionError()));
         iNetworkManager->disconnectSession();
     }
-
+#endif
     releaseStorages();
 
     delete iProfile;
@@ -125,6 +130,8 @@ bool SyncSession::start()
     // session is opened before starting our plugin runner
 
     if ((iProfile->destinationType() == SyncProfile::DESTINATION_TYPE_ONLINE) && !iScheduled) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#else
         iNetworkManager = new NetworkManager(this);
         connect(iNetworkManager, SIGNAL(connectionSuccess()),
                 SLOT(onNetworkSessionOpened()), Qt::QueuedConnection);
@@ -132,6 +139,7 @@ bool SyncSession::start()
                 SLOT(onNetworkSessionError()), Qt::QueuedConnection);
         // Return true here and wait for the session open status
         iNetworkManager->connectSession(iScheduled);
+#endif
         rv = true;
     } else {
         rv = tryStart();
@@ -416,7 +424,8 @@ void SyncSession::onNetworkSessionOpened()
 {
     // Start the plugin runner now
     FUNCTION_CALL_TRACE(lcButeoTrace);
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#else
     if (iNetworkManager) {
         // Disconnect all slots connected to the network manager
         disconnect(iNetworkManager, SIGNAL(connectionSuccess()),
@@ -424,7 +433,7 @@ void SyncSession::onNetworkSessionOpened()
         disconnect(iNetworkManager, SIGNAL(connectionError()),
                    this, SLOT(onNetworkSessionError()));
     }
-
+#endif
     if (false == tryStart()) {
         qCWarning(lcButeoMsyncd) << "attempt to start sync session due to network session opened failed!";
         updateResults(SyncResults(QDateTime::currentDateTime(),
@@ -439,7 +448,8 @@ void SyncSession::onNetworkSessionOpened()
 void SyncSession::onNetworkSessionError()
 {
     FUNCTION_CALL_TRACE(lcButeoTrace);
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#else
     if (iNetworkManager) {
         // Disconnect all slots connected to the network manager
         disconnect(iNetworkManager, SIGNAL(connectionSuccess()),
@@ -448,7 +458,7 @@ void SyncSession::onNetworkSessionError()
                    this, SLOT(onNetworkSessionError()));
         iNetworkManager->disconnectSession();
     }
-
+#endif
     updateResults(SyncResults(QDateTime::currentDateTime(),
                               SyncResults::SYNC_RESULT_FAILED,
                               Buteo::SyncResults::CONNECTION_ERROR));

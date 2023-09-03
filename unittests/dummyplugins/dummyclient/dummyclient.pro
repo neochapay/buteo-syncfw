@@ -8,6 +8,7 @@ INCLUDEPATH += . \
     ../../../libbuteosyncfw/profile
 
 QT -= gui
+QT += network
 CONFIG += plugin
 
 HEADERS += DummyClient.h

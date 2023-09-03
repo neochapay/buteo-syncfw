@@ -26,6 +26,11 @@
 #ifndef SYNCPROFILE_H
 #define SYNCPROFILE_H
 
+#include <QtCore>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#include <QNetworkInformation>
+#endif
+
 #include "Profile.h"
 #include "SyncLog.h"
 #include "SyncSchedule.h"
@@ -269,16 +274,22 @@ public:
      *
      * \return List of allowed connection types.
      */
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QList<QNetworkInformation::TransportMedium> internetConnectionTypes() const;
+#else
     QList<Sync::InternetConnectionType> internetConnectionTypes() const;
-
+#endif
     /*! \brief Sets the internet connection types on which this profile can be synced.
      *
      * If empty, the default settings are used.
      *
      * \param aTypes The allowed internet connection types.
      */
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void setInternetConnectionTypes(const QList<QNetworkInformation::TransportMedium> &aTypes);
+#else
     void setInternetConnectionTypes(const QList<Sync::InternetConnectionType> &aTypes);
-
+#endif
     /*! \brief Get the first service sub-profile.
      *
      * \return Service profile. NULL if not found.

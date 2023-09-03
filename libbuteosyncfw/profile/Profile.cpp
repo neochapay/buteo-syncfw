@@ -66,7 +66,11 @@ Profile::Profile(const QDomElement &aRoot)
         QString name = key.attribute(ATTR_NAME);
         QString value = key.attribute(ATTR_VALUE);
         if (!name.isEmpty() && !value.isNull()) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            d_ptr->iLocalKeys.insert(name, value);
+#else
             d_ptr->iLocalKeys.insertMulti(name, value);
+#endif
         } else {
             // Invalid key
         }
@@ -142,8 +146,11 @@ QString Profile::key(const QString &aName, const QString &aDefault) const
 QMap<QString, QString> Profile::allKeys() const
 {
     QMap<QString, QString> keys(d_ptr->iMergedKeys);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    keys.insert(d_ptr->iLocalKeys);
+#else
     keys.unite(d_ptr->iLocalKeys);
-
+#endif
     return keys;
 }
 
@@ -153,12 +160,18 @@ QMap<QString, QString> Profile::allNonStorageKeys() const
 
     foreach (Profile *p, d_ptr->iSubProfiles) {
         if (p != 0 && p->type() != Profile::TYPE_STORAGE) {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            keys.insert(p->allKeys());
+#else
             keys.unite(p->allKeys());
+#endif
         }
     }
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    keys.insert(allKeys());
+#else
     keys.unite(allKeys());
-
+#endif
     return keys;
 }
 
@@ -174,13 +187,24 @@ bool Profile::boolKey(const QString &aName, bool aDefault) const
 
 QStringList Profile::keyValues(const QString &aName) const
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QStringList values;
+    values.push_back(d_ptr->iLocalKeys.find(aName).value());
+    values.push_back(d_ptr->iMergedKeys.find(aName).value());
+    return values;
+#else
     return (d_ptr->iLocalKeys.values(aName) +
             d_ptr->iMergedKeys.values(aName));
+#endif
 }
 
 QStringList Profile::keyNames() const
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    return d_ptr->iLocalKeys.values() + d_ptr->iMergedKeys.values();
+#else
     return d_ptr->iLocalKeys.uniqueKeys() + d_ptr->iMergedKeys.uniqueKeys();
+#endif
 }
 
 void Profile::setKey(const QString &aName, const QString &aValue)
@@ -211,7 +235,11 @@ void Profile::setKeyValues(const QString &aName, const QStringList &aValues)
     unsigned i = aValues.size();
     do {
         i--;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        d_ptr->iLocalKeys.insert(aName, aValues[i]);
+#else
         d_ptr->iLocalKeys.insertMulti(aName, aValues[i]);
+#endif
     } while (i > 0);
 }
 
@@ -454,8 +482,13 @@ void Profile::merge(const Profile &aSource)
 
     if (target != 0) {
         // Merge keys. Allow multiple keys with the same name.
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        target->d_ptr->iMergedKeys.insert(aSource.d_ptr->iLocalKeys);
+        target->d_ptr->iMergedKeys.insert(aSource.d_ptr->iMergedKeys);
+#else
         target->d_ptr->iMergedKeys.unite(aSource.d_ptr->iLocalKeys);
         target->d_ptr->iMergedKeys.unite(aSource.d_ptr->iMergedKeys);
+#endif
 
         // Merge fields.
         QList<const ProfileField *> sourceFields =

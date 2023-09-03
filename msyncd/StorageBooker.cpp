@@ -27,7 +27,11 @@
 using namespace Buteo;
 
 StorageBooker::StorageBooker()
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     : iMutex(QMutex::Recursive)
+#else
+    : iMutex()
+#endif
 {
     FUNCTION_CALL_TRACE(lcButeoTrace);
 }

@@ -336,7 +336,7 @@ void ProfileTest::testValidate()
     // Removing required key makes the profile invalid.
     Profile *sub = p2->subProfile("hcalendar");
     QVERIFY(sub != 0);
-    sub->setKey("Target URI", QString::null);
+    sub->setKey("Target URI", QString());
     QEXPECT_FAIL("", "It seems all keys are dispensable with the current implementation", Continue);
     QCOMPARE(p2->isValid(), false);
     // Disabling the profile that requires the removed key makes the profile

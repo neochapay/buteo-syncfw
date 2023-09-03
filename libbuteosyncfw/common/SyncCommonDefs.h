@@ -24,10 +24,14 @@
 #ifndef SYNCCOMMONDEFS_H
 #define SYNCCOMMONDEFS_H
 
+#include <QtCore>
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QtNetwork/QNetworkConfiguration>
+#endif
+
 #include <QMetaType>
 #include <QDir>
 #include <QStandardPaths>
-#include <QtNetwork/QNetworkConfiguration>
 
 namespace Sync {
 
@@ -78,7 +82,7 @@ enum ConnectivityType {
     CONNECTIVITY_BT,
     CONNECTIVITY_INTERNET
 };
-
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 enum InternetConnectionType {
     INTERNET_CONNECTION_UNKNOWN = QNetworkConfiguration::BearerUnknown,
     INTERNET_CONNECTION_ETHERNET = QNetworkConfiguration::BearerEthernet,
@@ -94,6 +98,7 @@ enum InternetConnectionType {
     INTERNET_CONNECTION_EVDO = QNetworkConfiguration::BearerEVDO,
     INTERNET_CONNECTION_LTE = QNetworkConfiguration::BearerLTE
 };
+#endif
 
 // These are values that can be used for the SyncSchedule::interval, to specify sync intervals
 // that should be specially handled (instead of treating them as minute intervals). This allows

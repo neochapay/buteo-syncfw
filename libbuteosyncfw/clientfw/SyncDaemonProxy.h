@@ -42,6 +42,10 @@
 #include <QtCore/QStringList>
 #include <QtCore/QVariant>
 #include <QtDBus/QtDBus>
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+#define qVariantFromValue QVariant::fromValue
+#endif
+
 
 /*! \brief Proxy class for interface com.meego.msyncd
  */

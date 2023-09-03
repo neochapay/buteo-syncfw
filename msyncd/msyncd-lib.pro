@@ -19,19 +19,19 @@ INCLUDEPATH += . \
     ../libbuteosyncfw/profile
 
 
-PKGCONFIG += dbus-1 gio-2.0 libsignon-qt5 accounts-qt5
-packagesExist(mce-qt5) {
-    PKGCONFIG += mce-qt5
+PKGCONFIG += dbus-1 gio-2.0 libsignon-qt$${QT_MAJOR_VERSION} accounts-qt$${QT_MAJOR_VERSION}
+packagesExist(mce-qt$${QT_MAJOR_VERSION}) {
+    PKGCONFIG += mce-qt$${QT_MAJOR_VERSION}
     DEFINES += HAS_MCE
 } else {
-    message("mce-qt5 not found, MCE support disabled")
+    message("mce-qt not found, MCE support disabled")
 }
-LIBS += -lbuteosyncfw5
-packagesExist(qt5-boostable) {
+LIBS += -lbuteosyncfw$${QT_MAJOR_VERSION}
+packagesExist(qt$${QT_MAJOR_VERSION}-boostable) {
     DEFINES += HAS_BOOSTER
-    PKGCONFIG += qt5-boostable
+    PKGCONFIG += qt$${QT_MAJOR_VERSION}-boostable
 } else {
-    warning("qt5-boostable not available; startup times will be slower")
+    warning("qt$${QT_MAJOR_VERSION}-boostable not available; startup times will be slower")
 }
 
 QMAKE_LIBDIR_QT += ../libsyncprofile/
@@ -82,6 +82,7 @@ SOURCES += ServerActivator.cpp \
     SyncOnChangeScheduler.cpp
 
 contains(DEFINES, USE_KEEPALIVE) {
+    message("Use keepalive")
     PKGCONFIG += keepalive
 
     HEADERS += \
@@ -90,7 +91,8 @@ contains(DEFINES, USE_KEEPALIVE) {
     SOURCES += \
         BackgroundSync.cpp
 
-} else:contains(DEFINES, USE_IPHB) {
+} else {
+    message("Use libiphb")
     PKGCONFIG += libiphb
 
     HEADERS += \

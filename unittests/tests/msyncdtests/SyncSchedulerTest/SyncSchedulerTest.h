@@ -60,8 +60,13 @@ public:
     QDateTime nextSyncTime() const
     {
         const int HOUR = 3600;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        int syncTime_t = QDateTime::currentDateTime().toSecsSinceEpoch() + HOUR;
+        return QDateTime::fromSecsSinceEpoch(syncTime_t);
+#else
         int syncTime_t = QDateTime::currentDateTime().toTime_t() + HOUR;
         return QDateTime::fromTime_t(syncTime_t);
+#endif
     }
 
 };

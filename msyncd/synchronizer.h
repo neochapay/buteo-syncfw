@@ -277,9 +277,11 @@ private slots:
      * @param aProfileName Server profile name
      */
     void stopServer(const QString &aProfileName);
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void onNetworkStateChanged(bool aState, QNetworkInformation::TransportMedium type);
+#else
     void onNetworkStateChanged(bool aState, Sync::InternetConnectionType type);
-
+#endif
     /*! \brief call this to request the sync daemon to enable soc
      * for a profile. The sync daemon decides as of now for which storages
      * soc should be enabled
@@ -394,8 +396,11 @@ private:
      *
      * @param aType the connection type;
      */
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    bool acceptScheduledSync(SyncProfile *profile) const;
+#else
     bool acceptScheduledSync(bool aConnected, Sync::InternetConnectionType aType, SyncProfile *profile) const;
-
+#endif
     /*! \brief Checks the status of external sync for a given profile, when the status
      * changes(or aQuery param is set to true) or the profile is added for the first time 'syncedExternallyStatus' dbus signal
      * will be emitted to notify possible clients.
@@ -410,7 +415,11 @@ private:
     QList<QString> iProfilesToRemove;
     QMap<QString, ServerPluginRunner *> iServers;
     QList<QString> iWaitingOnlineSyncs;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QNetworkInformation *iNetworkManager;
+#else
     NetworkManager *iNetworkManager;
+#endif
     QMap<QString, int> iCountersStorage;
     PluginManager iPluginManager;
     ProfileManager iProfileManager;

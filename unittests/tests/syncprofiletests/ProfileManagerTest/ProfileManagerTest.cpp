@@ -239,7 +239,7 @@ void ProfileManagerTest::testGetBySingleCriteria()
     // Get profiles with existing key, undefined value.
     criteria.iType = ProfileManager::SearchCriteria::EXISTS;
     criteria.iKey = "enabled";
-    criteria.iValue = QString::null;
+    criteria.iValue = QString();
     criteriaList.clear();
     criteriaList.append(criteria);
     profiles = pm.getSyncProfilesByData(criteriaList);
@@ -269,8 +269,8 @@ void ProfileManagerTest::testGetBySingleCriteria()
     criteria.iType = ProfileManager::SearchCriteria::EXISTS;
     criteria.iSubProfileName = "unknown";
     criteria.iSubProfileType = Profile::TYPE_STORAGE;
-    criteria.iKey = QString::null;
-    criteria.iValue = QString::null;
+    criteria.iKey = QString();
+    criteria.iValue = QString();
     criteriaList.clear();
     criteriaList.append(criteria);
     profiles = pm.getSyncProfilesByData(criteriaList);
@@ -280,8 +280,8 @@ void ProfileManagerTest::testGetBySingleCriteria()
     criteria.iType = ProfileManager::SearchCriteria::EXISTS;
     criteria.iSubProfileName = HCALENDAR;
     criteria.iSubProfileType = Profile::TYPE_STORAGE;
-    criteria.iKey = QString::null;
-    criteria.iValue = QString::null;
+    criteria.iKey = QString();
+    criteria.iValue = QString();
     criteriaList.clear();
     criteriaList.append(criteria);
     profiles = pm.getSyncProfilesByData(criteriaList);
@@ -297,8 +297,8 @@ void ProfileManagerTest::testGetBySingleCriteria()
     criteria.iType = ProfileManager::SearchCriteria::NOT_EXISTS;
     criteria.iSubProfileName = HCALENDAR;
     criteria.iSubProfileType = Profile::TYPE_STORAGE;
-    criteria.iKey = QString::null;
-    criteria.iValue = QString::null;
+    criteria.iKey = QString();
+    criteria.iValue = QString();
     criteriaList.clear();
     criteriaList.append(criteria);
     profiles = pm.getSyncProfilesByData(criteriaList);
@@ -308,8 +308,8 @@ void ProfileManagerTest::testGetBySingleCriteria()
     criteria.iType = ProfileManager::SearchCriteria::NOT_EXISTS;
     criteria.iSubProfileName = "unknown";
     criteria.iSubProfileType = Profile::TYPE_STORAGE;
-    criteria.iKey = QString::null;
-    criteria.iValue = QString::null;
+    criteria.iKey = QString();
+    criteria.iValue = QString();
     criteriaList.clear();
     criteriaList.append(criteria);
     profiles = pm.getSyncProfilesByData(criteriaList);
@@ -334,7 +334,7 @@ void ProfileManagerTest::testGetBySingleCriteria()
     // Get profiles by sub-profile information, sub-profile name not defined,
     // key and value defined, no match.
     criteria.iType = ProfileManager::SearchCriteria::EQUAL;
-    criteria.iSubProfileName = QString::null;
+    criteria.iSubProfileName = QString();
     criteria.iSubProfileType = Profile::TYPE_STORAGE;
     criteria.iKey = "Target URI";
     criteria.iValue = "unknown";
@@ -347,8 +347,8 @@ void ProfileManagerTest::testGetBySingleCriteria()
     criteria.iType = ProfileManager::SearchCriteria::EXISTS;
     criteria.iSubProfileName = HCALENDAR;
     criteria.iSubProfileType = Profile::TYPE_STORAGE;
-    criteria.iKey = QString::null;
-    criteria.iValue = QString::null;
+    criteria.iKey = QString();
+    criteria.iValue = QString();
     criteriaList.clear();
     criteriaList.append(criteria);
     profiles = pm.getSyncProfilesByData(criteriaList);
@@ -407,7 +407,7 @@ void ProfileManagerTest::testGetBySingleCriteria()
     // Get profiles by sub-profile information, sub-profile name not defined,
     // key and value defined.
     criteria.iType = ProfileManager::SearchCriteria::EQUAL;
-    criteria.iSubProfileName = QString::null;
+    criteria.iSubProfileName = QString();
     criteria.iSubProfileType = Profile::TYPE_STORAGE;
     criteria.iKey = "Target URI";
     criteria.iValue = "./EventTask/Tasks";

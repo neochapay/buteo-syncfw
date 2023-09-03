@@ -29,7 +29,9 @@
 #include "ClientPluginRunner.h"
 #include "ServerPluginRunner.h"
 #include "AccountsHelper.h"
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include "NetworkManager.h"
+#endif
 #include "TransportTracker.h"
 #include "ServerActivator.h"
 
@@ -144,9 +146,11 @@ bool Synchronizer::initialize()
     // use queued connection because the profile will be stored after the signal
     connect(&iProfileManager, SIGNAL(signalProfileChanged(QString, int, QString)),
             this, SLOT(slotProfileChanged(QString, int, QString)), Qt::QueuedConnection);
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    iNetworkManager = QNetworkInformation::instance();
+#else
     iNetworkManager = new NetworkManager(this);
-
+#endif
     iTransportTracker = new TransportTracker(this);
 
     iServerActivator = new ServerActivator(iProfileManager,
@@ -300,7 +304,11 @@ bool Synchronizer::startScheduledSync(QString aProfileName)
     // All scheduled syncs are online syncs
     // Add this to the waiting online syncs and it will be started when we
     // receive a session connection status from the NetworkManager
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    bool accept = acceptScheduledSync(profile);
+#else
     bool accept = acceptScheduledSync(iNetworkManager->isOnline(), iNetworkManager->connectionType(), profile);
+#endif
     if (accept) {
         /* Ensure that current time is compatible with sync schedule.
            The Background process may have started a sync in a period
@@ -318,14 +326,26 @@ bool Synchronizer::startScheduledSync(QString aProfileName)
             }
         } else {
             qCDebug(lcButeoMsyncd) << "Scheduled sync of" << aProfileName << "accepted with current connection type" <<
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                      iNetworkManager->transportMedium();
+#else
                       iNetworkManager->connectionType();
+#endif
             startSync(aProfileName, true);
         }
     } else {
         qCInfo(lcButeoMsyncd) << "Wait for internet connection:" << aProfileName;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        if (iNetworkManager->reachability() == QNetworkInformation::Reachability::Online) {
+#else
         if (iNetworkManager->isOnline()) {
+#endif
             // see acceptScheduledSync() for the determination of whether the connection type is allowed for sync operations.
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            qCInfo(lcButeoMsyncd) << "Connection" << iNetworkManager->transportMedium() <<
+#else
             qCInfo(lcButeoMsyncd) << "Connection" << iNetworkManager->connectionType() <<
+#endif
                      "is of disallowed type. The sync will be postponed until an allowed connection is available.";
         } else {
             qCInfo(lcButeoMsyncd) << "Device offline. Wait for internet connection.";
@@ -577,7 +597,11 @@ bool Synchronizer::startSyncNow(SyncSession *aSession)
             QStringList list;
             list.append("launching");
             QList<QVariant> argumentList;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            argumentList << QVariant::fromValue(list);
+#else
             argumentList << qVariantFromValue(list);
+#endif
             iSyncUIInterface->asyncCallWithArgumentList(QLatin1String("launch"), argumentList);
         }
 
@@ -656,7 +680,11 @@ void Synchronizer::onSessionFinished(const QString &aProfileName,
             if (session->isScheduled()) {
                 // Calling this multiple times has no effect, even if the
                 // session was not actually opened
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                qCWarning(lcButeoMsyncd) << "Call to dissconect session not support";
+#else
                 iNetworkManager->disconnectSession();
+#endif
             }
             cleanupSession(session, aStatus);
             if (iProfilesToRemove.contains(aProfileName)) {
@@ -917,7 +945,11 @@ bool Synchronizer::updateProfile(QString aProfileAsXml)
                 if (!address.isNull()) {
                     if (profile->key(Buteo::KEY_UUID).isEmpty()) {
                         QString uuid = QUuid::createUuid().toString();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+                        uuid = uuid.remove(QRegularExpression("[{}]"));
+#else
                         uuid = uuid.remove(QRegExp("[{}]"));
+#endif
                         profile->setKey(Buteo::KEY_UUID, uuid);
                     }
                     if (profile->key(Buteo::KEY_REMOTE_NAME).isEmpty()) {
@@ -1277,10 +1309,10 @@ void Synchronizer::onNewSession(const QString &aDestination)
 
         if (aDestination.contains("USB")) {
             syncProfiles = iProfileManager.getSyncProfilesByData(
-                               QString::null, QString::null, KEY_DISPLAY_NAME, PC_SYNC);
+                               QString(), QString(), KEY_DISPLAY_NAME, PC_SYNC);
         } else {
             syncProfiles = iProfileManager.getSyncProfilesByData(
-                               QString::null, Profile::TYPE_SYNC, KEY_BT_ADDRESS, aDestination);
+                               QString(), Profile::TYPE_SYNC, KEY_BT_ADDRESS, aDestination);
         }
         if (syncProfiles.isEmpty()) {
             qCDebug(lcButeoMsyncd) << "No sync profiles found with a matching destination address";
@@ -1322,7 +1354,11 @@ void Synchronizer::onNewSession(const QString &aDestination)
             QStringList list;
             list.append("launching");
             QList<QVariant> argumentList;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            argumentList << QVariant::fromValue(list);
+#else
             argumentList << qVariantFromValue(list);
+#endif
             iSyncUIInterface->asyncCallWithArgumentList(QLatin1String("launch"), argumentList);
         }
 
@@ -1832,7 +1868,11 @@ QStringList Synchronizer::profilesByType(const QString &aType)
     return profilesAsXml;
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void Synchronizer::onNetworkStateChanged(bool aState, QNetworkInformation::TransportMedium type)
+#else
 void Synchronizer::onNetworkStateChanged(bool aState, Sync::InternetConnectionType type)
+#endif
 {
     FUNCTION_CALL_TRACE(lcButeoTrace);
     qCDebug(lcButeoMsyncd) << "Network state changed: OnLine:" << aState << " connection type:" <<  type;
@@ -1842,7 +1882,11 @@ void Synchronizer::onNetworkStateChanged(bool aState, Sync::InternetConnectionTy
         QStringList profiles(iWaitingOnlineSyncs);
         foreach (QString profileName, profiles) {
             SyncProfile *profile = iProfileManager.syncProfile(profileName);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            if (acceptScheduledSync(profile)) {
+#else
             if (acceptScheduledSync(aState, type, profile)) {
+#endif
                 // start sync now, we do not need to call 'startScheduledSync' since that function
                 // only checks for internet connection
                 iWaitingOnlineSyncs.removeOne(profileName);
@@ -1874,7 +1918,7 @@ Profile *Synchronizer::getSyncProfileByRemoteAddress(const QString &aAddress)
     QList<SyncProfile *> profiles;
     if ("USB" == aAddress) {
         profiles = iProfileManager.getSyncProfilesByData(
-                       QString::null, QString::null, KEY_DISPLAY_NAME, PC_SYNC);
+            QString(), QString(), KEY_DISPLAY_NAME, PC_SYNC);
     } else {
         profiles = iProfileManager.getSyncProfilesByData("",
                                                          Buteo::Profile::TYPE_SYNC,
@@ -1893,7 +1937,11 @@ QString Synchronizer::getValue(const QString &aAddress, const QString &aKey)
     QString value;
     if (Buteo::KEY_UUID == aKey) {
         iUUID = QUuid::createUuid().toString();
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        iUUID = iUUID.remove(QRegularExpression("[{}]"));
+#else
         iUUID = iUUID.remove(QRegExp("[{}]"));
+#endif
         value = iUUID;
     }
 
@@ -1995,11 +2043,18 @@ void Synchronizer::removeExternalSyncStatus(const SyncProfile *aProfile)
         }
     }
 }
-
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+bool Synchronizer::acceptScheduledSync(SyncProfile *aSyncProfile) const
+#else
 bool Synchronizer::acceptScheduledSync(bool aConnected, Sync::InternetConnectionType aType,
                                        SyncProfile *aSyncProfile) const
+#endif
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    if (iNetworkManager->reachability() != QNetworkInformation::Reachability::Online) {
+#else
     if (!aConnected) {
+#endif
         qCWarning(lcButeoMsyncd) << "Scheduled sync refused, not connected";
         return false;
     }
@@ -2008,7 +2063,23 @@ bool Synchronizer::acceptScheduledSync(bool aConnected, Sync::InternetConnection
         qCWarning(lcButeoMsyncd) << "Scheduled sync refused, invalid sync profile";
         return false;
     }
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QList<QNetworkInformation::TransportMedium> allowedTypes = aSyncProfile->internetConnectionTypes();
+    if(iNetworkManager->transportMedium() != QNetworkInformation::TransportMedium::Unknown && !allowedTypes.isEmpty()) {
+        return allowedTypes.contains(iNetworkManager->transportMedium());
+    }
 
+    if(iNetworkManager->transportMedium() == QNetworkInformation::TransportMedium::Ethernet
+        || iNetworkManager->transportMedium() == QNetworkInformation::TransportMedium::WiFi) {
+        return true;
+    }
+
+    if (g_settings_get_boolean(iSettings, "allow-scheduled-sync-over-cellular")) {
+        qCInfo(lcButeoMsyncd) << "Allowing sync for cellular/other connection type:" << iNetworkManager->transportMedium();
+        return true;
+    }
+    qCWarning(lcButeoMsyncd) << "Scheduled sync refused, profile disallows current connection type:" << iNetworkManager->transportMedium();
+#else
     QList<Sync::InternetConnectionType> allowedTypes = aSyncProfile->internetConnectionTypes();
     if (aType != Sync::INTERNET_CONNECTION_UNKNOWN && !allowedTypes.isEmpty()) {
         return allowedTypes.contains(aType);
@@ -2023,8 +2094,8 @@ bool Synchronizer::acceptScheduledSync(bool aConnected, Sync::InternetConnection
         qCInfo(lcButeoMsyncd) << "Allowing sync for cellular/other connection type:" << aType;
         return true;
     }
-
     qCWarning(lcButeoMsyncd) << "Scheduled sync refused, profile disallows current connection type:" << aType;
+#endif
     return false;
 }
 

@@ -34,13 +34,17 @@
 #ifndef SYNCBACKUPADAPTOR_H_1277973475
 #define SYNCBACKUPADAPTOR_H_1277973475
 
-#include <QtCore/QObject>
+#include <QtCore>
 #include <QtDBus/QtDBus>
 class QByteArray;
 template<class T> class QList;
 template<class Key, class Value> class QMap;
 class QString;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+using QStringList = class QList<QString>;
+#else
 class QStringList;
+#endif
 class QVariant;
 
 namespace Buteo {
